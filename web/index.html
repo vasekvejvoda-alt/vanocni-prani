@@ -170,7 +170,10 @@ async function boot() {
     const token = inviteToken();
     if (token) {
       await ensureSession();
-      await q(sb.rpc("redeem_invite", { p_token: token }));
+      // cizí pozvánka otevřená v prohlížeči, kde už je někdo přihlášený, by ho tiše přepnula
+      const cur = (await q(sb.rpc("app_state"))).me;
+      if (!cur || confirm(`V tomto prohlížeči je přihlášen(a) ${cur.name}. Otevřením pozvánky se přepnete na jejího majitele. Pokračovat?`))
+        await q(sb.rpc("redeem_invite", { p_token: token }));
       history.replaceState(null, "", location.pathname + "#/");
     }
     const st = await q(sb.rpc("app_state"));
